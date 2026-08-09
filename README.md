@@ -16,14 +16,24 @@ Running `setup-ghostty-terminal.sh` on a fresh Mac will:
 4. **Install [Ghostty](https://ghostty.org/)** via `brew install --cask ghostty`, and write a config to `~/.config/ghostty/config` using the **Kitty Default** theme, with a pure black background, `option+backspace` word-delete keybind, and SSH shell-integration features enabled — matching the example config from the source README.
 5. **Install [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)** non-interactively, without changing your login shell or overwriting an existing `.zshrc`.
 6. **Install [Powerlevel10k](https://github.com/romkatv/powerlevel10k)** via Homebrew and wire it into `.zshrc` (sourced directly, with Oh My Zsh's `ZSH_THEME` cleared so the two don't conflict). The Powerlevel10k configuration wizard runs automatically the first time you open a new terminal.
-7. **Install [Fastfetch](https://github.com/fastfetch-cli/fastfetch)** via Homebrew and add it to the very top of `.zshrc` so a system summary is shown on every new terminal session — it has to run before Oh My Zsh / Powerlevel10k's instant prompt initializes, otherwise Powerlevel10k raises a "console output during zsh initialization detected" warning.
-8. **Add a one-time self-heal hook** to `.zshrc`. Powerlevel10k's first-run configuration wizard (`p10k configure`, which launches automatically the first time you open Ghostty) inserts its own instant-prompt block at the very top of `.zshrc` — above the fastfetch line — which undoes the ordering from step 7 and brings the warning back. The hook waits until that wizard has actually completed, then silently re-positions fastfetch above everything else exactly once, and never touches the file again after that.
-
-If you ever see the "console output during zsh initialization detected" warning anyway (e.g. on an existing install from before this fix was added), run `fix-fastfetch-position.sh` once to repair it immediately - no need to wait for a new shell.
+7. **Install [Fastfetch](https://github.com/fastfetch-cli/fastfetch)** via Homebrew. It is *not* run automatically on new shells (see below) — run it manually any time with `fastfetch`.
 
 All installs run in verbose mode, and a `===> Step X/6` banner marks progress through each stage.
 
 The script backs up any existing `~/.zshrc` and Ghostty config (with a timestamp suffix) before making changes, and is safe to re-run — it skips anything already installed.
+
+### Optional: run fastfetch automatically on every new terminal
+
+By default fastfetch is just installed, not wired into `.zshrc`. If you'd like it to run automatically every time you open a new terminal, run:
+
+```bash
+chmod +x enable-fastfetch.sh
+./enable-fastfetch.sh
+```
+
+This simply inserts `fastfetch` as the literal first line of `~/.zshrc`. Run it any time after `setup-ghostty-terminal.sh` has finished — ideally after Powerlevel10k's `p10k configure` wizard has already run once (it launches automatically the first time you open Ghostty), so nothing gets inserted above it afterward and it stays at the top for good.
+
+This was previously wired in automatically during setup, but Powerlevel10k's first-run configuration wizard rewrites `.zshrc` to insert its own instant-prompt block at the very top of the file, which reliably undid that ordering and caused warnings (and, in one case, a corrupted `.zshrc`). Making it an opt-in manual step avoids that fragility entirely.
 
 ### Not installed
 
@@ -40,6 +50,8 @@ After it finishes:
 
 1. Quit and reopen Ghostty (or open it for the first time) to pick up the new config.
 2. Open a new Ghostty terminal — the Powerlevel10k configuration wizard launches automatically on first prompt load. Run `p10k configure` any time afterward to redo it.
+
+If you installed an earlier version of this script that did add fastfetch to `.zshrc` automatically, run `revert-fastfetch-zshrc.sh` once to strip that out cleanly, then optionally use `enable-fastfetch.sh` (see above) if you still want it running automatically.
 
 ## Ghostty config used
 
