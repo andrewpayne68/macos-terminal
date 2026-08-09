@@ -51,10 +51,10 @@ if ! xcode-select -p &>/dev/null; then
   sudo touch "${CLT_PLACEHOLDER}"
 
   CLT_PACKAGE="$(softwareupdate -l 2>/dev/null \
-    | grep -B 1 -E "Command Line Tools" \
-    | awk -F'\* ' '/^\ *\*/ {print $2}' \
+    | grep "\*.*Command Line Tools" \
     | tail -n 1 \
-    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+    | sed 's/^[^C]*C/C/' \
+    | sed 's/[[:space:]]*$//')"
 
   if [[ -n "${CLT_PACKAGE}" ]]; then
     info "Found package via softwareupdate: ${CLT_PACKAGE}"
