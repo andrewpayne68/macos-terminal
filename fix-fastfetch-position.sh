@@ -25,9 +25,14 @@ TMP="$(mktemp)"
   echo "fastfetch"
   echo "# <<< fastfetch-init <<<"
   echo ""
-  # Strip any previous fastfetch line(s)/comments/markers so nothing is duplicated
+  # Strip any previous fastfetch line(s)/comments/markers so nothing is duplicated.
+  # NOTE: the range pattern is anchored to whole lines (^...$) rather than a
+  # bare substring match, because a substring match would also match the
+  # marker text embedded inside the self-heal function's own echo/sed lines
+  # further down the file, causing sed to delete everything after that
+  # point (no closing match exists for that false hit).
   sed \
-    -e '/# >>> fastfetch-init >>>/,/# <<< fastfetch-init <<</d' \
+    -e '/^# >>> fastfetch-init >>>$/,/^# <<< fastfetch-init <<<$/d' \
     -e '/^fastfetch$/d' \
     -e '/^# Run fastfetch on new terminal sessions/d' \
     -e '/^# top of \.zshrc - see Powerlevel10k instant prompt docs)/d' \

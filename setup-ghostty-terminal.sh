@@ -242,28 +242,37 @@ fi
 # the first time Ghostty opens with no ~/.p10k.zsh yet) inserts its own
 # instant-prompt block at the very top of .zshrc - ABOVE the fastfetch line
 # added above, undoing that ordering and re-triggering the "console output
-# during zsh initialization detected" warning. This self-healing check runs
-# on every shell start, does nothing until ~/.p10k.zsh appears (i.e. until
-# configure has actually run), then re-positions fastfetch above everything
-# exactly once and never touches the file again after that.
+# during zsh initialization detected" warning. This self-healing hook defers
+# the repair to a precmd hook, which only fires once .zshrc has fully
+# finished sourcing and the shell is about to show its first prompt - it is
+# NOT safe to rewrite .zshrc while it is still being actively read/executed
+# (that corrupts the file), so the fix must happen after sourcing completes,
+# not inline during it. It does nothing until ~/.p10k.zsh appears (i.e.
+# until configure has actually run), then re-positions fastfetch above
+# everything exactly once and never touches the file again after that.
 if ! grep -qF "fastfetch-position-fix" "${ZSHRC}"; then
   cat >> "${ZSHRC}" <<'ZSHRC_SNIPPET'
 
 # >>> fastfetch-position-fix >>>
 if [[ -f "${HOME}/.p10k.zsh" && ! -f "${HOME}/.cache/.p10k-fastfetch-fixed" ]]; then
-  mkdir -p "${HOME}/.cache"
-  __ff_zshrc="${HOME}/.zshrc"
-  __ff_tmp="$(mktemp)"
-  {
-    echo "# >>> fastfetch-init >>>"
-    echo "fastfetch"
-    echo "# <<< fastfetch-init <<<"
-    echo ""
-    sed '/# >>> fastfetch-init >>>/,/# <<< fastfetch-init <<</d' "${__ff_zshrc}"
-  } > "${__ff_tmp}"
-  mv "${__ff_tmp}" "${__ff_zshrc}"
-  touch "${HOME}/.cache/.p10k-fastfetch-fixed"
-  unset __ff_zshrc __ff_tmp
+  __fastfetch_position_fix() {
+    mkdir -p "${HOME}/.cache"
+    local __ff_zshrc="${HOME}/.zshrc"
+    local __ff_tmp
+    __ff_tmp="$(mktemp)"
+    {
+      echo "# >>> fastfetch-init >>>"
+      echo "fastfetch"
+      echo "# <<< fastfetch-init <<<"
+      echo ""
+      sed '/^# >>> fastfetch-init >>>$/,/^# <<< fastfetch-init <<<$/d' "${__ff_zshrc}"
+    } > "${__ff_tmp}"
+    mv "${__ff_tmp}" "${__ff_zshrc}"
+    touch "${HOME}/.cache/.p10k-fastfetch-fixed"
+    precmd_functions=(${precmd_functions:#__fastfetch_position_fix})
+    unfunction __fastfetch_position_fix
+  }
+  precmd_functions+=(__fastfetch_position_fix)
 fi
 # <<< fastfetch-position-fix <<<
 ZSHRC_SNIPPET
