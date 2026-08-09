@@ -220,10 +220,20 @@ else
 fi
 
 if ! grep -qF "fastfetch" "${ZSHRC}"; then
-  echo "" >> "${ZSHRC}"
-  echo "# Run fastfetch on new terminal sessions" >> "${ZSHRC}"
-  echo "fastfetch" >> "${ZSHRC}"
-  ok "Added fastfetch to .zshrc so it runs on new shell sessions."
+  # fastfetch must run before anything else in .zshrc (including Oh My Zsh /
+  # Powerlevel10k's instant prompt), otherwise its console output triggers
+  # Powerlevel10k's "console output during zsh initialization detected"
+  # warning. So it's prepended to the very top of the file, not appended.
+  TMP_ZSHRC="$(mktemp)"
+  {
+    echo "# Run fastfetch on new terminal sessions (must stay at the very"
+    echo "# top of .zshrc - see Powerlevel10k instant prompt docs)"
+    echo "fastfetch"
+    echo ""
+    cat "${ZSHRC}"
+  } > "${TMP_ZSHRC}"
+  mv "${TMP_ZSHRC}" "${ZSHRC}"
+  ok "Added fastfetch to the top of .zshrc so it runs on new shell sessions."
 else
   ok "fastfetch already referenced in .zshrc"
 fi
