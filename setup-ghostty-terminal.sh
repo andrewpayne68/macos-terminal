@@ -23,6 +23,7 @@ info()  { printf '\033[1;34m[INFO]\033[0m %s\n' "$1"; }
 ok()    { printf '\033[1;32m[ OK ]\033[0m %s\n' "$1"; }
 warn()  { printf '\033[1;33m[WARN]\033[0m %s\n' "$1"; }
 err()   { printf '\033[1;31m[FAIL]\033[0m %s\n' "$1" >&2; }
+step()  { printf '\n\033[1;36m===> Step %s/6: %s\033[0m\n' "$1" "$2"; }
 
 if [[ "$(uname)" != "Darwin" ]]; then
   err "This script only runs on macOS."
@@ -30,11 +31,43 @@ if [[ "$(uname)" != "Darwin" ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# 0. Cache admin credentials (needed for the unattended CLT install below)
+# ---------------------------------------------------------------------------
+info "This script needs admin rights to install Command Line Tools unattended."
+sudo -v
+# Keep the sudo timestamp alive in the background until this script exits.
+( while true; do sudo -n true; sleep 60; kill -0 "$$" 2>/dev/null || exit; done ) &
+SUDO_KEEPALIVE_PID=$!
+trap 'kill "${SUDO_KEEPALIVE_PID}" &>/dev/null || true' EXIT
+
+# ---------------------------------------------------------------------------
 # 1. Xcode Command Line Tools (Homebrew requires these)
 # ---------------------------------------------------------------------------
+step 1 "Xcode Command Line Tools"
 if ! xcode-select -p &>/dev/null; then
-  info "Installing Xcode Command Line Tools (a system dialog will pop up)..."
-  xcode-select --install || true
+  info "Installing Xcode Command Line Tools (unattended, no popup)..."
+
+  CLT_PLACEHOLDER="/tmp/.com.apple.dt.CommandLineTools.installondemand.in-progress"
+  sudo touch "${CLT_PLACEHOLDER}"
+
+  CLT_PACKAGE="$(softwareupdate -l 2>/dev/null \
+    | grep -B 1 -E "Command Line Tools" \
+    | awk -F'\* ' '/^\ *\*/ {print $2}' \
+    | tail -n 1 \
+    | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')"
+
+  if [[ -n "${CLT_PACKAGE}" ]]; then
+    info "Found package via softwareupdate: ${CLT_PACKAGE}"
+    sudo softwareupdate -i "${CLT_PACKAGE}" --verbose
+  else
+    warn "Could not auto-detect the CLT package via softwareupdate."
+    warn "Falling back to xcode-select --install (a system dialog will appear - click Install)."
+    sudo rm -f "${CLT_PLACEHOLDER}"
+    xcode-select --install || true
+  fi
+
+  sudo rm -f "${CLT_PLACEHOLDER}"
+
   info "Waiting for Xcode Command Line Tools installation to finish..."
   until xcode-select -p &>/dev/null; do
     sleep 5
@@ -47,9 +80,10 @@ fi
 # ---------------------------------------------------------------------------
 # 2. Homebrew
 # ---------------------------------------------------------------------------
+step 2 "Homebrew"
 if ! command -v brew &>/dev/null; then
-  info "Installing Homebrew..."
-  NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+  info "Installing Homebrew (verbose)..."
+  NONINTERACTIVE=1 /bin/bash -c "$(curl -fL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 else
   ok "Homebrew already installed."
 fi
@@ -86,15 +120,16 @@ else
   ok "Homebrew shellenv already present in ${ZPROFILE}"
 fi
 
-info "Updating Homebrew..."
-brew update
+info "Updating Homebrew (verbose)..."
+brew update --verbose
 
 # ---------------------------------------------------------------------------
 # 3. Ghostty
 # ---------------------------------------------------------------------------
+step 3 "Ghostty"
 if ! brew list --cask ghostty &>/dev/null; then
-  info "Installing Ghostty..."
-  brew install --cask ghostty
+  info "Installing Ghostty (verbose)..."
+  brew install --cask ghostty --verbose
 else
   ok "Ghostty already installed."
 fi
@@ -125,13 +160,14 @@ ok "Wrote Ghostty config to ${GHOSTTY_CONFIG_FILE} (Kitty Default theme)."
 # ---------------------------------------------------------------------------
 # 4. Oh My Zsh
 # ---------------------------------------------------------------------------
+step 4 "Oh My Zsh"
 if [[ ! -d "${HOME}/.oh-my-zsh" ]]; then
-  info "Installing Oh My Zsh..."
+  info "Installing Oh My Zsh (verbose)..."
   # KEEP_ZSHRC=yes: don't overwrite an existing .zshrc
   # CHSH=no / RUNZSH=no: don't touch login shell or drop into a new zsh
   #                      session in the middle of this script
   KEEP_ZSHRC=yes CHSH=no RUNZSH=no \
-    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+    sh -c "$(curl -fL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 else
   ok "Oh My Zsh already installed."
 fi
@@ -144,9 +180,10 @@ info "Backed up existing .zshrc"
 # ---------------------------------------------------------------------------
 # 5. Powerlevel10k (installed via Homebrew, per the README)
 # ---------------------------------------------------------------------------
+step 5 "Powerlevel10k"
 if ! brew list powerlevel10k &>/dev/null; then
-  info "Installing Powerlevel10k..."
-  brew install powerlevel10k
+  info "Installing Powerlevel10k (verbose)..."
+  brew install powerlevel10k --verbose
 else
   ok "Powerlevel10k already installed."
 fi
@@ -174,9 +211,10 @@ ok "Set ZSH_THEME=\"\" in .zshrc so Powerlevel10k controls the prompt."
 # ---------------------------------------------------------------------------
 # 6. Fastfetch
 # ---------------------------------------------------------------------------
+step 6 "Fastfetch"
 if ! brew list fastfetch &>/dev/null; then
-  info "Installing Fastfetch..."
-  brew install fastfetch
+  info "Installing Fastfetch (verbose)..."
+  brew install fastfetch --verbose
 else
   ok "Fastfetch already installed."
 fi
