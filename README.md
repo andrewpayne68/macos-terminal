@@ -17,6 +17,9 @@ Running `setup-ghostty-terminal.sh` on a fresh Mac will:
 5. **Install [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)** non-interactively, without changing your login shell or overwriting an existing `.zshrc`.
 6. **Install [Powerlevel10k](https://github.com/romkatv/powerlevel10k)** via Homebrew and wire it into `.zshrc` (sourced directly, with Oh My Zsh's `ZSH_THEME` cleared so the two don't conflict). The Powerlevel10k configuration wizard runs automatically the first time you open a new terminal.
 7. **Install [Fastfetch](https://github.com/fastfetch-cli/fastfetch)** via Homebrew and add it to the very top of `.zshrc` so a system summary is shown on every new terminal session — it has to run before Oh My Zsh / Powerlevel10k's instant prompt initializes, otherwise Powerlevel10k raises a "console output during zsh initialization detected" warning.
+8. **Add a one-time self-heal hook** to `.zshrc`. Powerlevel10k's first-run configuration wizard (`p10k configure`, which launches automatically the first time you open Ghostty) inserts its own instant-prompt block at the very top of `.zshrc` — above the fastfetch line — which undoes the ordering from step 7 and brings the warning back. The hook waits until that wizard has actually completed, then silently re-positions fastfetch above everything else exactly once, and never touches the file again after that.
+
+If you ever see the "console output during zsh initialization detected" warning anyway (e.g. on an existing install from before this fix was added), run `fix-fastfetch-position.sh` once to repair it immediately - no need to wait for a new shell.
 
 All installs run in verbose mode, and a `===> Step X/6` banner marks progress through each stage.
 

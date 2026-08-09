@@ -219,16 +219,16 @@ else
   ok "Fastfetch already installed."
 fi
 
-if ! grep -qF "fastfetch" "${ZSHRC}"; then
+if ! grep -qF "fastfetch-init" "${ZSHRC}"; then
   # fastfetch must run before anything else in .zshrc (including Oh My Zsh /
   # Powerlevel10k's instant prompt), otherwise its console output triggers
   # Powerlevel10k's "console output during zsh initialization detected"
   # warning. So it's prepended to the very top of the file, not appended.
   TMP_ZSHRC="$(mktemp)"
   {
-    echo "# Run fastfetch on new terminal sessions (must stay at the very"
-    echo "# top of .zshrc - see Powerlevel10k instant prompt docs)"
+    echo "# >>> fastfetch-init >>>"
     echo "fastfetch"
+    echo "# <<< fastfetch-init <<<"
     echo ""
     cat "${ZSHRC}"
   } > "${TMP_ZSHRC}"
@@ -236,6 +236,40 @@ if ! grep -qF "fastfetch" "${ZSHRC}"; then
   ok "Added fastfetch to the top of .zshrc so it runs on new shell sessions."
 else
   ok "fastfetch already referenced in .zshrc"
+fi
+
+# Powerlevel10k's first-run "p10k configure" wizard (triggered automatically
+# the first time Ghostty opens with no ~/.p10k.zsh yet) inserts its own
+# instant-prompt block at the very top of .zshrc - ABOVE the fastfetch line
+# added above, undoing that ordering and re-triggering the "console output
+# during zsh initialization detected" warning. This self-healing check runs
+# on every shell start, does nothing until ~/.p10k.zsh appears (i.e. until
+# configure has actually run), then re-positions fastfetch above everything
+# exactly once and never touches the file again after that.
+if ! grep -qF "fastfetch-position-fix" "${ZSHRC}"; then
+  cat >> "${ZSHRC}" <<'ZSHRC_SNIPPET'
+
+# >>> fastfetch-position-fix >>>
+if [[ -f "${HOME}/.p10k.zsh" && ! -f "${HOME}/.cache/.p10k-fastfetch-fixed" ]]; then
+  mkdir -p "${HOME}/.cache"
+  __ff_zshrc="${HOME}/.zshrc"
+  __ff_tmp="$(mktemp)"
+  {
+    echo "# >>> fastfetch-init >>>"
+    echo "fastfetch"
+    echo "# <<< fastfetch-init <<<"
+    echo ""
+    sed '/# >>> fastfetch-init >>>/,/# <<< fastfetch-init <<</d' "${__ff_zshrc}"
+  } > "${__ff_tmp}"
+  mv "${__ff_tmp}" "${__ff_zshrc}"
+  touch "${HOME}/.cache/.p10k-fastfetch-fixed"
+  unset __ff_zshrc __ff_tmp
+fi
+# <<< fastfetch-position-fix <<<
+ZSHRC_SNIPPET
+  ok "Added a one-time self-heal hook that re-fixes fastfetch's position after p10k configure runs."
+else
+  ok "fastfetch self-heal hook already present in .zshrc"
 fi
 
 # ---------------------------------------------------------------------------
