@@ -24,14 +24,29 @@ The script backs up any existing `~/.zshrc` and Ghostty config (with a timestamp
 
 ### Optional: run fastfetch automatically on every new terminal
 
-By default fastfetch is just installed, not wired into `.zshrc`. If you'd like it to run automatically every time you open a new terminal, run:
+By default fastfetch is just installed, not wired into `.zshrc`. If you'd like it to run automatically every time you open a new terminal — with an Apple-logo themed layout — run:
 
 ```bash
 chmod +x enable-fastfetch.sh
 ./enable-fastfetch.sh
 ```
 
-This simply inserts `fastfetch` as the literal first line of `~/.zshrc`. Run it any time after `setup-ghostty-terminal.sh` has finished — ideally after Powerlevel10k's `p10k configure` wizard has already run once (it launches automatically the first time you open Ghostty), so nothing gets inserted above it afterward and it stays at the top for good.
+Or run it directly from GitHub without cloning the repo — since it depends on the binary `fastfetch-apple.tar.gz` sitting next to it, this needs two quick downloads rather than a single piped one-liner:
+
+```bash
+curl -fsSL -o enable-fastfetch.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/enable-fastfetch.sh
+curl -fsSL -o fastfetch-apple.tar.gz https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/fastfetch-apple.tar.gz
+chmod +x enable-fastfetch.sh
+./enable-fastfetch.sh
+```
+
+This must be run from the same folder as `fastfetch-apple.tar.gz`. It will:
+
+- Install fastfetch via Homebrew if it isn't already installed.
+- Extract `fastfetch-apple.tar.gz` to `~/.config/fastfetch/` — fastfetch's default config location — including the `assets/` subfolder and its `apple.png` logo, which the bundled `config.jsonc` references directly. Any existing `config.jsonc` is backed up first.
+- Insert `fastfetch` as the literal first line of `~/.zshrc`.
+
+Run it any time after `setup-ghostty-terminal.sh` has finished — ideally after Powerlevel10k's `p10k configure` wizard has already run once (it launches automatically the first time you open Ghostty), so nothing gets inserted above it afterward and it stays at the top for good.
 
 This was previously wired in automatically during setup, but Powerlevel10k's first-run configuration wizard rewrites `.zshrc` to insert its own instant-prompt block at the very top of the file, which reliably undid that ordering and caused warnings (and, in one case, a corrupted `.zshrc`). Making it an opt-in manual step avoids that fragility entirely.
 
