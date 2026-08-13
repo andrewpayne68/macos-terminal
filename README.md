@@ -41,7 +41,16 @@ This was previously wired in automatically during setup, but Powerlevel10k's fir
 
 ## Usage
 
+Run directly from GitHub, no cloning needed:
+
 ```bash
+curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh | bash
+```
+
+Or download it first if you'd rather review it before running:
+
+```bash
+curl -fsSL -o setup-ghostty-terminal.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh
 chmod +x setup-ghostty-terminal.sh
 ./setup-ghostty-terminal.sh
 ```
