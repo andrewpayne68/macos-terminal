@@ -91,6 +91,29 @@ shell-integration-features = ssh-terminfo,ssh-env
 confirm-close-surface = false
 ```
 
+## Direct Installation from GitHub
+
+Run everything straight from this repo, no cloning needed.
+
+**1. Install Ghostty, Oh My Zsh, and Powerlevel10k:**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh | bash
+```
+
+Once that finishes, close the default macOS Terminal app and open **Ghostty** instead. The Powerlevel10k configuration wizard will launch automatically the first time you open a new Ghostty window — complete the wizard's on-screen questions to set up your prompt style.
+
+**2. Once the wizard is done, install the Apple-logo fastfetch theme:**
+
+```bash
+curl -fsSL -o enable-fastfetch.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/enable-fastfetch.sh
+curl -fsSL -o fastfetch-apple.tar.gz https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/fastfetch-apple.tar.gz
+chmod +x enable-fastfetch.sh
+./enable-fastfetch.sh
+```
+
+Open a new Ghostty window/tab afterward to see the Apple logo and system summary on every new terminal.
+
 ## Credit
 
 Setup steps adapted from [andrewpayne68/macos-terminal-oh-my-ghostty](https://github.com/andrewpayne68/macos-terminal-oh-my-ghostty), itself forked from [sudo-conner/oh-my-ghostty](https://github.com/sudo-conner/oh-my-ghostty).
