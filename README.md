@@ -114,6 +114,8 @@ chmod +x enable-fastfetch.sh
 
 Open a new Ghostty window/tab afterward to see the Apple logo and system summary on every new terminal.
 
+![Ghostty terminal with the Apple-logo fastfetch theme](terminal.png)
+
 ## Credit
 
 Setup steps adapted from [andrewpayne68/macos-terminal-oh-my-ghostty](https://github.com/andrewpayne68/macos-terminal-oh-my-ghostty), itself forked from [sudo-conner/oh-my-ghostty](https://github.com/sudo-conner/oh-my-ghostty).
