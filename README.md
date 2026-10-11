@@ -93,7 +93,37 @@ confirm-close-surface = false
 
 ## Direct Installation from GitHub
 
-Run everything straight from this repo, no cloning needed.
+One command does everything — Ghostty, Oh My Zsh, Powerlevel10k, and the Apple-logo fastfetch theme — straight from this repo, no cloning needed:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/install-ghostty-terminal.sh | bash
+```
+
+This is `install-ghostty-terminal.sh`, a guided installer that walks through the whole thing for you:
+
+- Confirms what it's about to do before touching anything.
+- Installs Ghostty, Oh My Zsh, and Powerlevel10k (Step 1).
+- If a saved Powerlevel10k config is found (see below), restores it to `~/.p10k.zsh` so the **first-run configuration wizard is skipped entirely** (Step 2), then installs the Apple-logo fastfetch theme (Step 3) — fully automatic, start to finish.
+- If no saved config is found, it installs Ghostty/Oh My Zsh/Powerlevel10k, then tells you to open Ghostty, complete the Powerlevel10k wizard by hand, and run the command again — it detects what's already done and finishes the fastfetch theme for you.
+- If Ghostty is already installed, it offers a full **reset**: everything (`~/.zshrc`, `~/.p10k.zsh`, `~/.oh-my-zsh`, `~/.config/ghostty`) is moved — never deleted — to a timestamped backup folder before reinstalling. Requires typing `YES` to confirm.
+
+Prompts are read directly from the terminal, so the piped `curl | bash` form above works fine interactively.
+
+![Ghostty terminal with the Apple-logo fastfetch theme](terminal-macbook.png)
+
+### Saving your Powerlevel10k config (optional, recommended)
+
+Powerlevel10k's wizard asks the same style questions every time, and a `.zshrc` copied between Macs is unreliable (different usernames, different installed pieces). The fix is to save just `~/.p10k.zsh` — it's portable and has no secrets — as `p10k.zsh` in this repo (or in `~/scripts/p10k.zsh` locally, or point `$P10K_CONFIG` at it). Once that's there, `install-ghostty-terminal.sh` finds it automatically and every future Mac skips the wizard completely.
+
+```bash
+cp ~/.p10k.zsh /path/to/this/repo/p10k.zsh
+```
+
+Then push it up with `push-to-github.sh` like any other file in this repo.
+
+### Manual installation (step by step)
+
+If you'd rather run each part yourself instead of the guided installer above:
 
 **1. Install Ghostty, Oh My Zsh, and Powerlevel10k:**
 
@@ -113,8 +143,6 @@ chmod +x enable-fastfetch.sh
 ```
 
 Open a new Ghostty window/tab afterward to see the Apple logo and system summary on every new terminal.
-
-![Ghostty terminal with the Apple-logo fastfetch theme](terminal-macbook.png)
 
 ## Credit
 
