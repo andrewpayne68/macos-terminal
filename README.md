@@ -87,10 +87,6 @@ shell-integration-features = ssh-terminfo,ssh-env
 confirm-close-surface = false
 ```
 
-## Not installed
-
-`bat`, `eza` and `zoxide` are deliberately not installed, so `cat`, `ls` and `cd` stay as the macOS defaults.
-
 ## Why fastfetch is set up last
 
 Powerlevel10k's first-run wizard rewrites `~/.zshrc` and inserts its own block at the very top, which used to push fastfetch out of first place and trigger a "console output during zsh initialization" warning. Restoring the saved config first, then adding fastfetch last, keeps it on line 1.
