@@ -8,7 +8,7 @@ Based on the walkthrough in [andrewpayne68/macos-terminal-oh-my-ghostty](https:/
 
 ## What it does
 
-Running `setup-ghostty-terminal.sh` on a fresh Mac will:
+`install-ghostty-terminal.sh` (see [Direct Installation from GitHub](#direct-installation-from-github)) runs the base setup script, `setup-ghostty-terminal.sh`, as its first step. On a fresh Mac that will:
 
 1. **Prompt once for admin credentials** (`sudo -v`) and keep them cached for the duration of the script, so you're only asked once.
 2. **Install Xcode Command Line Tools** (if missing) unattended — using the `softwareupdate` CLI instead of `xcode-select --install`, so no "Install Command Line Tools?" GUI popup appears. Falls back to the GUI popup only if the package can't be auto-detected.
@@ -56,26 +56,11 @@ This was previously wired in automatically during setup, but Powerlevel10k's fir
 
 ## Usage
 
-Run directly from GitHub, no cloning needed:
+See [Direct Installation from GitHub](#direct-installation-from-github) below — `install-ghostty-terminal.sh` is the recommended way to run everything, including this script, with one command.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh | bash
-```
+`setup-ghostty-terminal.sh` on its own only does the base install (Homebrew, Ghostty, Oh My Zsh, Powerlevel10k, Fastfetch) — no saved Powerlevel10k config, no Apple-logo theme. See [Manual installation](#manual-installation-step-by-step) if you specifically want to run just this part.
 
-Or download it first if you'd rather review it before running:
-
-```bash
-curl -fsSL -o setup-ghostty-terminal.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh
-chmod +x setup-ghostty-terminal.sh
-./setup-ghostty-terminal.sh
-```
-
-After it finishes:
-
-1. Quit and reopen Ghostty (or open it for the first time) to pick up the new config.
-2. Open a new Ghostty terminal — the Powerlevel10k configuration wizard launches automatically on first prompt load. Run `p10k configure` any time afterward to redo it.
-
-If you installed an earlier version of this script that did add fastfetch to `.zshrc` automatically, run `revert-fastfetch-zshrc.sh` once to strip that out cleanly, then optionally use `enable-fastfetch.sh` (see above) if you still want it running automatically.
+If you installed an earlier version of this script that did add fastfetch to `.zshrc` automatically, run `revert-fastfetch-zshrc.sh` once to strip that out cleanly, then optionally use `enable-fastfetch.sh` if you still want it running automatically.
 
 ## Ghostty config used
 
