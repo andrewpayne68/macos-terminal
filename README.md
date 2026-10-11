@@ -2,65 +2,76 @@
 
 ![Ghostty terminal with Powerlevel10k and fastfetch](screenshot.png)
 
-A single script to set up a beautiful, fast macOS terminal on a brand-new Mac: **Homebrew**, **Ghostty**, **Oh My Zsh**, **Powerlevel10k**, and **Fastfetch** — configured and ready to go with no manual steps.
+One script that sets up a beautiful, fast terminal on a brand-new Mac: **Homebrew**, **Ghostty**, **Oh My Zsh**, **Powerlevel10k** and **Fastfetch** with an Apple-logo theme, installed in the right order with no manual steps.
 
 Based on the walkthrough in [andrewpayne68/macos-terminal-oh-my-ghostty](https://github.com/andrewpayne68/macos-terminal-oh-my-ghostty), turned into a single automated script.
 
+## Install
+
+Paste this into Terminal.app on the Mac:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/install-ghostty-terminal.sh | bash
+```
+
+Or download it first if you would rather read it before running:
+
+```bash
+curl -fsSL -o install-ghostty-terminal.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/install-ghostty-terminal.sh
+chmod +x install-ghostty-terminal.sh
+./install-ghostty-terminal.sh
+```
+
+It asks you to confirm, asks for your admin password once, then runs to the end. Open Ghostty when it finishes.
+
+![Ghostty terminal with the Apple-logo fastfetch theme](terminal-macbook.png)
+
 ## What it does
 
-`install-ghostty-terminal.sh` (see [Direct Installation from GitHub](#direct-installation-from-github)) runs the base setup script, `setup-ghostty-terminal.sh`, as its first step. On a fresh Mac that will:
+**Step 1: Ghostty, Oh My Zsh and Powerlevel10k**
 
-1. **Prompt once for admin credentials** (`sudo -v`) and keep them cached for the duration of the script, so you're only asked once.
-2. **Install Xcode Command Line Tools** (if missing) unattended — using the `softwareupdate` CLI instead of `xcode-select --install`, so no "Install Command Line Tools?" GUI popup appears. Falls back to the GUI popup only if the package can't be auto-detected.
-3. **Install Homebrew** and set up its `PATH`/`shellenv` by adding it to `~/.zprofile`, so `brew` works correctly in every new shell on both Apple Silicon (`/opt/homebrew`) and Intel (`/usr/local`) Macs.
-4. **Install [Ghostty](https://ghostty.org/)** via `brew install --cask ghostty`, and write a config to `~/.config/ghostty/config` using the **Kitty Default** theme, with a pure black background, `option+backspace` word-delete keybind, and SSH shell-integration features enabled — matching the example config from the source README.
-5. **Install [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh)** non-interactively, without changing your login shell or overwriting an existing `.zshrc`.
-6. **Install [Powerlevel10k](https://github.com/romkatv/powerlevel10k)** via Homebrew and wire it into `.zshrc` (sourced directly, with Oh My Zsh's `ZSH_THEME` cleared so the two don't conflict). The Powerlevel10k configuration wizard runs automatically the first time you open a new terminal.
-7. **Install [Fastfetch](https://github.com/fastfetch-cli/fastfetch)** via Homebrew. It is *not* run automatically on new shells (see below) — run it manually any time with `fastfetch`.
+1. Asks for your admin password once and keeps it cached for the run.
+2. Installs the Xcode Command Line Tools if missing, unattended, using `softwareupdate`, so no "Install Command Line Tools?" popup appears.
+3. Installs Homebrew and adds it to `~/.zprofile` so `brew` works in every new shell on Apple Silicon and Intel Macs.
+4. Installs [Ghostty](https://ghostty.org/) and writes `~/.config/ghostty/config` (see below).
+5. Installs [Oh My Zsh](https://github.com/ohmyzsh/ohmyzsh) without changing your login shell or overwriting an existing `.zshrc`.
+6. Installs [Powerlevel10k](https://github.com/romkatv/powerlevel10k) via Homebrew and adds it to `.zshrc`.
+7. Installs [Fastfetch](https://github.com/fastfetch-cli/fastfetch).
 
-All installs run in verbose mode, and a `===> Step X/6` banner marks progress through each stage.
+**Step 2: Restore your saved Powerlevel10k config**
 
-The script backs up any existing `~/.zshrc` and Ghostty config (with a timestamp suffix) before making changes, and is safe to re-run — it skips anything already installed.
+If a saved `p10k.zsh` is found (this repo includes one), it is copied to `~/.p10k.zsh` and sourced from `.zshrc`, so the first-run Powerlevel10k wizard never appears.
 
-### Optional: run fastfetch automatically on every new terminal
+**Step 3: Apple-logo fastfetch theme**
 
-By default fastfetch is just installed, not wired into `.zshrc`. If you'd like it to run automatically every time you open a new terminal — with an Apple-logo themed layout — run:
+Extracts `fastfetch-apple.tar.gz` into `~/.config/fastfetch/` (including `assets/apple.png`) and puts `fastfetch` on the first line of `~/.zshrc`, so it runs in every new terminal.
 
-```bash
-chmod +x enable-fastfetch.sh
-./enable-fastfetch.sh
-```
+Existing files are always backed up with a timestamp before they are changed. The installer is safe to re-run.
 
-Or run it directly from GitHub without cloning the repo — since it depends on the binary `fastfetch-apple.tar.gz` sitting next to it, this needs two quick downloads rather than a single piped one-liner:
+## If something is already installed
 
-```bash
-curl -fsSL -o enable-fastfetch.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/enable-fastfetch.sh
-curl -fsSL -o fastfetch-apple.tar.gz https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/fastfetch-apple.tar.gz
-chmod +x enable-fastfetch.sh
-./enable-fastfetch.sh
-```
+If Ghostty is already installed you are asked whether to **reset**. Answer `N` to keep what you have; Step 1 is skipped and Steps 2 and 3 still run, which is handy after completing the Powerlevel10k wizard by hand. Answer `y` and type `YES` for a full reset: `~/.zshrc`, `~/.p10k.zsh`, `~/.oh-my-zsh` and `~/.config/ghostty` are **moved, never deleted**, to `~/.terminal-setup-backup-<timestamp>`, then everything is reinstalled. Run a reset from Terminal.app, not from inside Ghostty.
 
-This must be run from the same folder as `fastfetch-apple.tar.gz`. It will:
+## Your own Powerlevel10k config
 
-- Install fastfetch via Homebrew if it isn't already installed.
-- Extract `fastfetch-apple.tar.gz` to `~/.config/fastfetch/` — fastfetch's default config location — including the `assets/` subfolder and its `apple.png` logo, which the bundled `config.jsonc` references directly. Any existing `config.jsonc` is backed up first.
-- Insert `fastfetch` as the literal first line of `~/.zshrc`.
+The saved config is looked for in this order:
 
-Run it any time after `setup-ghostty-terminal.sh` has finished — ideally after Powerlevel10k's `p10k configure` wizard has already run once (it launches automatically the first time you open Ghostty), so nothing gets inserted above it afterward and it stays at the top for good.
+1. `$P10K_CONFIG`, a path to a `p10k.zsh` file
+2. `p10k.zsh` next to the script
+3. `~/scripts/p10k.zsh`
+4. `p10k.zsh` in this repo (downloaded from GitHub)
 
-This was previously wired in automatically during setup, but Powerlevel10k's first-run configuration wizard rewrites `.zshrc` to insert its own instant-prompt block at the very top of the file, which reliably undid that ordering and caused warnings (and, in one case, a corrupted `.zshrc`). Making it an opt-in manual step avoids that fragility entirely.
+To use your own, finish the wizard once with `p10k configure`, then copy `~/.p10k.zsh` over `p10k.zsh` in this repo. A Powerlevel10k config has no secrets, but this repo is public.
 
-### Not installed
+If no saved config is found, only Step 1 runs. Open Ghostty, complete the wizard, then run the install command again and answer `N` to the reset question to finish Step 3.
 
-`bat`, `eza`, and `zoxide` are intentionally **not** installed by this script (unlike the source walkthrough), so the terminal is left running the default `cat`, `ls`, and `cd`.
+## Files in this repo
 
-## Usage
-
-See [Direct Installation from GitHub](#direct-installation-from-github) below — `install-ghostty-terminal.sh` is the recommended way to run everything, including this script, with one command.
-
-`setup-ghostty-terminal.sh` on its own only does the base install (Homebrew, Ghostty, Oh My Zsh, Powerlevel10k, Fastfetch) — no saved Powerlevel10k config, no Apple-logo theme. See [Manual installation](#manual-installation-step-by-step) if you specifically want to run just this part.
-
-If you installed an earlier version of this script that did add fastfetch to `.zshrc` automatically, run `revert-fastfetch-zshrc.sh` once to strip that out cleanly, then optionally use `enable-fastfetch.sh` if you still want it running automatically.
+| File | Purpose |
+|---|---|
+| `install-ghostty-terminal.sh` | The installer. Everything above is in this one script. |
+| `p10k.zsh` | Saved Powerlevel10k config, so the wizard is skipped. |
+| `fastfetch-apple.tar.gz` | Fastfetch `config.jsonc` and the Apple logo image. |
 
 ## Ghostty config used
 
@@ -76,58 +87,13 @@ shell-integration-features = ssh-terminfo,ssh-env
 confirm-close-surface = false
 ```
 
-## Direct Installation from GitHub
+## Not installed
 
-One command does everything — Ghostty, Oh My Zsh, Powerlevel10k, and the Apple-logo fastfetch theme — straight from this repo, no cloning needed:
+`bat`, `eza` and `zoxide` are deliberately not installed, so `cat`, `ls` and `cd` stay as the macOS defaults.
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/install-ghostty-terminal.sh | bash
-```
+## Why fastfetch is set up last
 
-This is `install-ghostty-terminal.sh`, a guided installer that walks through the whole thing for you:
-
-- Confirms what it's about to do before touching anything.
-- Installs Ghostty, Oh My Zsh, and Powerlevel10k (Step 1).
-- If a saved Powerlevel10k config is found (see below), restores it to `~/.p10k.zsh` so the **first-run configuration wizard is skipped entirely** (Step 2), then installs the Apple-logo fastfetch theme (Step 3) — fully automatic, start to finish.
-- If no saved config is found, it installs Ghostty/Oh My Zsh/Powerlevel10k, then tells you to open Ghostty, complete the Powerlevel10k wizard by hand, and run the command again — it detects what's already done and finishes the fastfetch theme for you.
-- If Ghostty is already installed, it offers a full **reset**: everything (`~/.zshrc`, `~/.p10k.zsh`, `~/.oh-my-zsh`, `~/.config/ghostty`) is moved — never deleted — to a timestamped backup folder before reinstalling. Requires typing `YES` to confirm.
-
-Prompts are read directly from the terminal, so the piped `curl | bash` form above works fine interactively.
-
-![Ghostty terminal with the Apple-logo fastfetch theme](terminal-macbook.png)
-
-### Saving your Powerlevel10k config (optional, recommended)
-
-Powerlevel10k's wizard asks the same style questions every time, and a `.zshrc` copied between Macs is unreliable (different usernames, different installed pieces). The fix is to save just `~/.p10k.zsh` — it's portable and has no secrets — as `p10k.zsh` in this repo (or in `~/scripts/p10k.zsh` locally, or point `$P10K_CONFIG` at it). Once that's there, `install-ghostty-terminal.sh` finds it automatically and every future Mac skips the wizard completely.
-
-```bash
-cp ~/.p10k.zsh /path/to/this/repo/p10k.zsh
-```
-
-Then push it up with `push-to-github.sh` like any other file in this repo.
-
-### Manual installation (step by step)
-
-If you'd rather run each part yourself instead of the guided installer above:
-
-**1. Install Ghostty, Oh My Zsh, and Powerlevel10k:**
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/setup-ghostty-terminal.sh | bash
-```
-
-Once that finishes, close the default macOS Terminal app and open **Ghostty** instead. The Powerlevel10k configuration wizard will launch automatically the first time you open a new Ghostty window — complete the wizard's on-screen questions to set up your prompt style.
-
-**2. Once the wizard is done, install the Apple-logo fastfetch theme:**
-
-```bash
-curl -fsSL -o enable-fastfetch.sh https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/enable-fastfetch.sh
-curl -fsSL -o fastfetch-apple.tar.gz https://raw.githubusercontent.com/andrewpayne68/macos-terminal/main/fastfetch-apple.tar.gz
-chmod +x enable-fastfetch.sh
-./enable-fastfetch.sh
-```
-
-Open a new Ghostty window/tab afterward to see the Apple logo and system summary on every new terminal.
+Powerlevel10k's first-run wizard rewrites `~/.zshrc` and inserts its own block at the very top, which used to push fastfetch out of first place and trigger a "console output during zsh initialization" warning. Restoring the saved config first, then adding fastfetch last, keeps it on line 1.
 
 ## Credit
 
