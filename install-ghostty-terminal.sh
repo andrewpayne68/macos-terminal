@@ -207,7 +207,7 @@ run_base_setup() (
 
   cat > "${GHOSTTY_CONFIG_FILE}" <<'EOF'
 theme = Kitty Default
-font-size = 14
+font-size = 16
 window-width = 111
 window-height = 41
 background-opacity = 0.9

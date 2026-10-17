@@ -77,7 +77,7 @@ If no saved config is found, only Step 1 runs. Open Ghostty, complete the wizard
 
 ```
 theme = Kitty Default
-font-size = 14
+font-size = 16
 window-width = 111
 window-height = 41
 background-opacity = 0.9
